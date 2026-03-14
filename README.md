@@ -1,16 +1,8 @@
-# English B2 Hub (theory edition)
+# English Growth Hub
 
-Website tĩnh nhiều trang để học tiếng Anh theo mục tiêu B2 hoặc hơn.
+Website học tiếng Anh nhiều trang, tối ưu cho GitHub Pages.
 
-## Có gì trong bản này
-- Trang chủ với roadmap 12 tuần
-- Trang tài nguyên chính thống
-- Trang lý thuyết chi tiết cho vocabulary, grammar, listening, reading, speaking, writing
-- Tracker theo tuần
-- Vocabulary notebook, reading journal, listening notes, writing draft lưu bằng localStorage
-- Flashcards và prompt generator
-
-## Cách đưa lên GitHub Pages
-1. Upload toàn bộ file và thư mục `assets/` vào repo GitHub Pages
-2. Đảm bảo `index.html` ở thư mục gốc
-3. Commit và push
+- CEFR roadmap A1–C1
+- vocab, grammar, listening, reading, speaking, writing
+- AI Lab, Media Hub, games, tracker
+- update log để phát triển theo phiên bản

@@ -1,299 +1,47 @@
 
 const storageKeys = {
-  vocab: "english_b2_hub_vocab",
-  readingJournal: "english_b2_hub_reading_journal",
-  grammar: "english_b2_hub_grammar",
-  speaking: "english_b2_hub_speaking",
-  writing: "english_b2_hub_writing",
-  habits: "english_b2_hub_habits",
-  noteListening: "english_b2_hub_listening_notes",
-  noteWriting: "english_b2_hub_writing_draft"
+  vocab: 'english_growth_vocab',
+  grammar: 'english_growth_grammar',
+  speaking: 'english_growth_speaking',
+  habits: 'english_growth_habits',
+  readingJournal: 'english_growth_journal',
+  listeningNotes: 'english_growth_listening_notes',
+  writingDraft: 'english_growth_writing_draft'
 };
-
-const grammarItems = [
-  "Present simple / continuous / perfect / perfect continuous",
-  "Past simple / continuous / perfect",
-  "Future forms and degrees of certainty",
-  "Modal verbs: obligation, advice, deduction, criticism",
-  "Conditionals 0–3 and mixed conditionals",
-  "Passive voice in common tenses",
-  "Reported speech and reporting verbs",
-  "Relative clauses and reduced relative clauses",
-  "Articles, quantifiers and determiners",
-  "Gerunds, infinitives and verb patterns",
-  "Comparing ideas with linkers",
-  "Complex sentences with clauses of reason, result and contrast"
-];
-
-const speakingItems = [
-  "Tôi có trả lời đúng trọng tâm câu hỏi không?",
-  "Tôi có mở và kết câu trả lời rõ ràng không?",
-  "Tôi có dùng ví dụ cụ thể không?",
-  "Tôi có dùng linking words không?",
-  "Tôi có nói đủ 60–120 giây không?",
-  "Tôi có tự sửa hoặc diễn đạt lại khi bí từ không?",
-  "Tôi có nghe lại bản ghi âm và sửa 3 lỗi lớn nhất không?"
-];
-
-const writingItems = [
-  "Có trả lời đúng task và đúng dạng bài không?",
-  "Mở bài có nêu chủ đề / mục đích rõ không?",
-  "Mỗi đoạn có 1 ý chính rõ ràng không?",
-  "Có ví dụ hoặc giải thích hỗ trợ không?",
-  "Có dùng linking words hợp lý không?",
-  "Có kiểm tra verb tense, articles, prepositions không?",
-  "Kết bài có tóm ý hoặc recommendation không?"
-];
-
-const habitItems = [
-  "Học 50+ từ/collocations trong tuần",
-  "Ôn ít nhất 3 chủ điểm grammar",
-  "Nghe 4 bài có transcript",
-  "Nghe 2 bài không transcript ngay từ đầu",
-  "Đọc 3 bài và tóm tắt lại",
-  "Nói 4 buổi có ghi âm",
-  "Viết ít nhất 1 đoạn / 1 bài ngắn",
-  "Làm 1 bài test hoặc sample task"
-];
-
-const speakingPrompts = [
-  "Describe a skill you want to improve this year. Why is it important and how will you improve it?",
-  "Do you think online learning is better than classroom learning? Give reasons and examples.",
-  "Talk about a memorable trip or place you visited. What made it special?",
-  "What are the advantages and disadvantages of using social media every day?",
-  "Describe a problem students often face when learning English and suggest two solutions.",
-  "Do you prefer working alone or in a team? Explain your opinion with examples.",
-  "What makes a good teacher? Talk about qualities, examples and your own experience.",
-  "How can young people use technology in a productive way instead of wasting time?"
-];
-
-const writingPrompts = [
-  "Essay: Do online courses make education more effective? Give your opinion and examples.",
-  "Article: Write an article about the best way to improve English outside the classroom.",
-  "Review: Write a review of a useful app, website or course for learning English.",
-  "Report: Suggest two ways your school or team can help learners improve their English faster.",
-  "Email: Write to a friend explaining how you plan to reach B2 in English this year.",
-  "Opinion paragraph: Should students use AI tools when learning languages? Why / why not?"
-];
-
-const flashcards = [
-  {front:"take responsibility", back:"chịu trách nhiệm", example:"You need to take responsibility for your mistakes."},
-  {front:"make progress", back:"tiến bộ", example:"Consistent practice helps you make progress."},
-  {front:"meet a deadline", back:"đáp ứng hạn chót", example:"We worked late to meet the deadline."},
-  {front:"in my opinion", back:"theo quan điểm của tôi", example:"In my opinion, reading daily is essential."},
-  {front:"a wide range of", back:"một phạm vi rộng của", example:"B2 learners need a wide range of vocabulary."},
-  {front:"deal with", back:"xử lý", example:"She can deal with common problems in English."}
-];
-
-function getSaved(key, fallback = []) {
-  try {
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : fallback;
-  } catch (error) {
-    return fallback;
-  }
-}
-function setSaved(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-function bindTabs() {
-  const tabs = document.querySelectorAll(".skill-tab");
-  const panels = document.querySelectorAll(".resource-panel");
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((item) => item.classList.remove("active"));
-      panels.forEach((panel) => panel.classList.remove("active"));
-      tab.classList.add("active");
-      const target = document.getElementById(tab.dataset.panel);
-      if (target) target.classList.add("active");
-    });
-  });
-}
-function bindAccordions() {
-  document.querySelectorAll(".accordion-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      btn.closest(".accordion-item").classList.toggle("open");
-    });
-  });
-}
-function renderCheckboxList(containerId, items, storageKey) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  const saved = getSaved(storageKey, Array(items.length).fill(false));
-  container.innerHTML = items.map((item, index) => `
-    <div class="check-item">
-      <input type="checkbox" data-key="${storageKey}" data-index="${index}" ${saved[index] ? "checked" : ""} />
-      <label>${item}</label>
-    </div>
-  `).join("");
-  container.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
-    checkbox.addEventListener("change", () => {
-      const current = getSaved(storageKey, Array(items.length).fill(false));
-      current[Number(checkbox.dataset.index)] = checkbox.checked;
-      setSaved(storageKey, current);
-      if (storageKey === storageKeys.habits) updateProgress();
-    });
-  });
-}
-function updateProgress() {
-  const data = getSaved(storageKeys.habits, Array(habitItems.length).fill(false));
-  const done = data.filter(Boolean).length;
-  const percent = Math.round((done / habitItems.length) * 100);
-  const text = document.getElementById("progressText");
-  const bar = document.getElementById("progressBar");
-  if (text) text.textContent = `${done} / ${habitItems.length} thói quen hoàn thành`;
-  if (bar) bar.style.width = `${percent}%`;
-}
-function renderPrompt(targetId, list) {
-  const box = document.getElementById(targetId);
-  if (!box) return;
-  box.textContent = list[Math.floor(Math.random() * list.length)];
-}
-function bindPromptButton(buttonId, boxId, list) {
-  const btn = document.getElementById(buttonId);
-  if (!btn) return;
-  btn.addEventListener("click", () => renderPrompt(boxId, list));
-}
-function renderVocabList() {
-  const container = document.getElementById("vocabList");
-  if (!container) return;
-  const list = getSaved(storageKeys.vocab, []);
-  if (!list.length) {
-    container.innerHTML = `<div class="note">Chưa có từ nào được lưu. Hãy thêm từ từ bài đọc, bài nghe hoặc speaking practice của bạn.</div>`;
-    return;
-  }
-  container.innerHTML = list.map((item, index) => `
-    <div class="vocab-item">
-      <div>
-        <strong>${item.word}</strong>
-        <div class="small">${item.meaning}</div>
-        ${item.example ? `<p style="margin-top:8px;color:var(--muted)">${item.example}</p>` : ""}
-      </div>
-      <button class="icon-btn" data-remove-index="${index}" title="Xóa">✕</button>
-    </div>
-  `).join("");
-  container.querySelectorAll("[data-remove-index]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const index = Number(btn.dataset.removeIndex);
-      const current = getSaved(storageKeys.vocab, []);
-      current.splice(index, 1);
-      setSaved(storageKeys.vocab, current);
-      renderVocabList();
-    });
-  });
-}
-function bindVocabSave() {
-  const btn = document.getElementById("saveWordBtn");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    const wordInput = document.getElementById("wordInput");
-    const meaningInput = document.getElementById("meaningInput");
-    const exampleInput = document.getElementById("exampleInput");
-    const word = wordInput.value.trim();
-    const meaning = meaningInput.value.trim();
-    const example = exampleInput.value.trim();
-    if (!word || !meaning) {
-      alert("Hãy nhập ít nhất từ/cụm từ và nghĩa.");
-      return;
-    }
-    const current = getSaved(storageKeys.vocab, []);
-    current.unshift({word, meaning, example});
-    setSaved(storageKeys.vocab, current);
-    wordInput.value = "";
-    meaningInput.value = "";
-    exampleInput.value = "";
-    renderVocabList();
-  });
-}
-function bindFlashcards() {
-  const card = document.getElementById("flashcard");
-  const btn = document.getElementById("nextFlashcardBtn");
-  if (!card || !btn) return;
-  let idx = 0;
-  let showBack = false;
-  function paint() {
-    const item = flashcards[idx];
-    card.innerHTML = showBack
-      ? `<div><div class="kicker">Meaning</div><h3>${item.back}</h3><p>${item.example}</p><div class="hint">Bấm vào thẻ để quay lại mặt trước</div></div>`
-      : `<div><div class="kicker">Collocation</div><h3>${item.front}</h3><div class="hint">Bấm vào thẻ để xem nghĩa và ví dụ</div></div>`;
-  }
-  card.addEventListener("click", () => { showBack = !showBack; paint(); });
-  btn.addEventListener("click", () => { idx = (idx + 1) % flashcards.length; showBack = false; paint(); });
-  paint();
-}
-function bindTextStorage(textareaId, key) {
-  const el = document.getElementById(textareaId);
-  if (!el) return;
-  const saved = getSaved(key, "");
-  if (typeof saved === "string") el.value = saved;
-  el.addEventListener("input", () => setSaved(key, el.value));
-}
-function renderJournal() {
-  const container = document.getElementById("journalList");
-  if (!container) return;
-  const list = getSaved(storageKeys.readingJournal, []);
-  if (!list.length) {
-    container.innerHTML = `<div class="note">Chưa có reading journal. Sau mỗi bài đọc, hãy lưu 1 câu tóm tắt + 3 từ/cụm mới.</div>`;
-    return;
-  }
-  container.innerHTML = list.map((item, index) => `
-    <div class="journal-item">
-      <div>
-        <strong>${item.title}</strong>
-        <p style="margin:0 0 8px;color:var(--muted)">${item.summary}</p>
-        <div class="small code-like">${item.words}</div>
-      </div>
-      <button class="icon-btn" data-remove-journal="${index}" title="Xóa">✕</button>
-    </div>
-  `).join("");
-  container.querySelectorAll("[data-remove-journal]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const index = Number(btn.dataset.removeJournal);
-      const current = getSaved(storageKeys.readingJournal, []);
-      current.splice(index, 1);
-      setSaved(storageKeys.readingJournal, current);
-      renderJournal();
-    });
-  });
-}
-function bindJournalSave() {
-  const btn = document.getElementById("saveJournalBtn");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    const title = document.getElementById("journalTitle").value.trim();
-    const summary = document.getElementById("journalSummary").value.trim();
-    const words = document.getElementById("journalWords").value.trim();
-    if (!title || !summary) {
-      alert("Hãy nhập ít nhất tiêu đề và tóm tắt.");
-      return;
-    }
-    const current = getSaved(storageKeys.readingJournal, []);
-    current.unshift({title, summary, words});
-    setSaved(storageKeys.readingJournal, current);
-    document.getElementById("journalTitle").value = "";
-    document.getElementById("journalSummary").value = "";
-    document.getElementById("journalWords").value = "";
-    renderJournal();
-  });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  bindTabs();
-  bindAccordions();
-  renderCheckboxList("grammarChecklist", grammarItems, storageKeys.grammar);
-  renderCheckboxList("speakingChecklist", speakingItems, storageKeys.speaking);
-  renderCheckboxList("writingChecklist", writingItems, storageKeys.writing);
-  renderCheckboxList("habitChecklist", habitItems, storageKeys.habits);
-  renderPrompt("speakingPromptBox", speakingPrompts);
-  bindPromptButton("newSpeakingPromptBtn", "speakingPromptBox", speakingPrompts);
-  renderPrompt("writingPromptBox", writingPrompts);
-  bindPromptButton("newWritingPromptBtn", "writingPromptBox", writingPrompts);
-  renderVocabList();
-  bindVocabSave();
-  bindFlashcards();
-  bindTextStorage("listeningNotes", storageKeys.noteListening);
-  bindTextStorage("writingDraft", storageKeys.noteWriting);
-  renderJournal();
-  bindJournalSave();
-  updateProgress();
-});
+const grammarItems = ["Present perfect vs past simple", "Future forms and certainty", "Modal verbs for advice, deduction and obligation", "Conditionals 0\u20133 and mixed conditionals", "Passive voice in common contexts", "Reported speech and reporting verbs", "Relative clauses", "Articles and quantifiers", "Gerunds and infinitives", "Linkers for contrast, addition and result"];
+const speakingItems = ["T\u00f4i tr\u1ea3 l\u1eddi \u0111\u00fang tr\u1ecdng t\u00e2m c\u00e2u h\u1ecfi", "T\u00f4i ph\u00e1t tri\u1ec3n \u00fd b\u1eb1ng reason + example", "T\u00f4i d\u00f9ng linking words h\u1ee3p l\u00fd", "T\u00f4i n\u00f3i \u0111\u1ee7 th\u1eddi l\u01b0\u1ee3ng m\u1ee5c ti\u00eau", "T\u00f4i c\u00f3 t\u1ef1 s\u1eeda ho\u1eb7c di\u1ec5n \u0111\u1ea1t l\u1ea1i khi b\u00ed t\u1eeb", "T\u00f4i nghe l\u1ea1i b\u1ea3n ghi \u00e2m v\u00e0 r\u00fat ra 3 l\u1ed7i"];
+const habitItems = ["H\u1ecdc 50+ t\u1eeb/collocations trong tu\u1ea7n", "\u00d4n \u00edt nh\u1ea5t 3 ch\u1ee7 \u0111i\u1ec3m grammar", "Nghe 4 b\u00e0i c\u00f3 transcript", "L\u00e0m 2 b\u00e0i dictation ho\u1eb7c listening notes", "\u0110\u1ecdc 3 b\u00e0i v\u00e0 l\u01b0u journal", "N\u00f3i 4 bu\u1ed5i c\u00f3 ghi \u00e2m", "Vi\u1ebft \u00edt nh\u1ea5t 1 \u0111o\u1ea1n / 1 b\u00e0i ng\u1eafn", "D\u00f9ng AI \u0111\u1ec3 review \u00edt nh\u1ea5t 2 \u0111\u1ea7u ra"];
+const prompts = ["Describe a skill you want to improve this year. Why is it important and how will you improve it?", "Do you think online learning is better than classroom learning? Give reasons and examples.", "What are the advantages and disadvantages of social media for students?", "Describe a problem learners often face when studying English and suggest two solutions.", "Do you prefer working alone or in a team? Explain with examples.", "What makes a good teacher? Talk about qualities and experience."];
+const writingPrompts = ["Write 140\u2013190 words: Do online courses make learning more effective? Give your opinion and examples.", "Write a short review of a useful app or website for learning English.", "Write a report suggesting how students can improve their English faster at school.", "Write an article about the benefits and drawbacks of learning with AI tools."];
+const flashcards = [{"word": "benefit", "meaning": "lợi ích"}, {"word": "challenge", "meaning": "thử thách"}, {"word": "effective", "meaning": "hiệu quả"}, {"word": "evidence", "meaning": "bằng chứng"}, {"word": "responsibility", "meaning": "trách nhiệm"}, {"word": "maintain", "meaning": "duy trì"}, {"word": "improve", "meaning": "cải thiện"}, {"word": "opportunity", "meaning": "cơ hội"}];
+const scrambleWords = ["effective", "benefit", "challenge", "maintain", "evidence", "improve", "opinion", "support"];
+let flashIndex = 0;
+let flashShowMeaning = true;
+let currentScramble = '';
+let currentDictationTranscript = '';
+let currentDictationTitle = '';
+function getSaved(key, fallback=null){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
+function setSaved(key, value){localStorage.setItem(key, JSON.stringify(value));}
+function bindAccordions(){document.querySelectorAll('.accordion-btn').forEach(btn=>btn.addEventListener('click',()=>btn.parentElement.classList.toggle('open')));}
+function bindTabs(){const tabs=document.querySelectorAll('.skill-tab');if(!tabs.length)return;tabs.forEach(tab=>tab.addEventListener('click',()=>{document.querySelectorAll('.skill-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.resource-panel').forEach(p=>p.classList.remove('active'));tab.classList.add('active');const panel=document.getElementById(tab.dataset.panel);if(panel)panel.classList.add('active');}));}
+function renderCheckboxList(containerId, items, storageKey){const container=document.getElementById(containerId);if(!container)return;const saved=getSaved(storageKey, Array(items.length).fill(false));container.innerHTML=items.map((item,index)=>`<div class="check-item"><input type="checkbox" data-index="${index}" ${saved[index]?'checked':''} /><label>${item}</label></div>`).join('');container.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.addEventListener('change',()=>{const current=getSaved(storageKey, Array(items.length).fill(false));current[Number(cb.dataset.index)]=cb.checked;setSaved(storageKey,current);if(storageKey===storageKeys.habits)updateProgress();}));}
+function updateProgress(){const pText=document.getElementById('progressText');const pBar=document.getElementById('progressBar');if(!pText||!pBar)return;const data=getSaved(storageKeys.habits,Array(habitItems.length).fill(false));const done=data.filter(Boolean).length;const percent=Math.round(done/habitItems.length*100);pText.textContent=`${done} / ${habitItems.length} thói quen hoàn thành`;pBar.style.width=`${percent}%`;}
+function renderVocabList(){const container=document.getElementById('vocabList');if(!container)return;const list=getSaved(storageKeys.vocab,[]);if(!list.length){container.innerHTML='<div class="note">Chưa có từ nào được lưu.</div>';return;}container.innerHTML=list.map((item,index)=>`<div class="vocab-item"><div><strong>${item.word}</strong><div class="small">${item.meaning}</div>${item.example?`<p class="small" style="margin-top:8px">${item.example}</p>`:''}</div><button class="icon-btn" data-remove-index="${index}">✕</button></div>`).join('');container.querySelectorAll('[data-remove-index]').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.removeIndex);const current=getSaved(storageKeys.vocab,[]);current.splice(idx,1);setSaved(storageKeys.vocab,current);renderVocabList();}));}
+function bindSaveWord(){const btn=document.getElementById('saveWordBtn');if(!btn)return;btn.addEventListener('click',()=>{const word=document.getElementById('wordInput').value.trim();const meaning=document.getElementById('meaningInput').value.trim();const example=document.getElementById('exampleInput').value.trim();if(!word||!meaning){alert('Hãy nhập từ/cụm từ và nghĩa.');return;}const current=getSaved(storageKeys.vocab,[]);current.unshift({word,meaning,example});setSaved(storageKeys.vocab,current);document.getElementById('wordInput').value='';document.getElementById('meaningInput').value='';document.getElementById('exampleInput').value='';renderVocabList();});}
+function renderFlashcard(){const wordEl=document.getElementById('flashWord');const meaningEl=document.getElementById('flashMeaning');if(!wordEl||!meaningEl)return;const card=flashcards[flashIndex%flashcards.length];wordEl.textContent=card.word;meaningEl.textContent=flashShowMeaning?card.meaning:'???';}
+function bindFlashcards(){const flip=document.getElementById('flipFlashBtn');const next=document.getElementById('nextFlashBtn');if(!flip||!next)return;renderFlashcard();flip.addEventListener('click',()=>{flashShowMeaning=!flashShowMeaning;renderFlashcard();});next.addEventListener('click',()=>{flashIndex=(flashIndex+1)%flashcards.length;flashShowMeaning=true;renderFlashcard();renderVocabQuiz();renderScramble();});}
+function renderVocabQuiz(){const q=document.getElementById('vocabQuizQuestion');const opts=document.getElementById('vocabQuizOptions');const fb=document.getElementById('vocabQuizFeedback');if(!q||!opts||!fb)return;const correct=flashcards[Math.floor(Math.random()*flashcards.length)];const others=flashcards.filter(x=>x.word!==correct.word).sort(()=>Math.random()-0.5).slice(0,3);const options=[correct,...others].sort(()=>Math.random()-0.5);q.textContent=`Từ nào nghĩa là "${correct.meaning}"?`;fb.textContent='';opts.innerHTML=options.map(opt=>`<button class="option-btn" data-correct="${opt.word===correct.word}">${opt.word}</button>`).join('');opts.querySelectorAll('.option-btn').forEach(btn=>btn.addEventListener('click',()=>{opts.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);if(btn.dataset.correct==='true'){btn.style.borderColor='rgba(126,240,194,.5)';btn.style.background='rgba(126,240,194,.12)';fb.textContent='Đúng rồi. Hãy đặt từ này vào một câu của riêng bạn.';}else{btn.style.borderColor='rgba(255,155,155,.5)';btn.style.background='rgba(255,155,155,.12)';fb.textContent=`Chưa đúng. Đáp án là ${correct.word}.`;opts.querySelector('[data-correct="true"]').style.borderColor='rgba(126,240,194,.5)';opts.querySelector('[data-correct="true"]').style.background='rgba(126,240,194,.12)';}}));}
+function shuffleWord(word){const arr=word.toUpperCase().split('');for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr.join(' ');}
+function renderScramble(){const letters=document.getElementById('scrambleLetters');const input=document.getElementById('scrambleInput');const fb=document.getElementById('scrambleFeedback');if(!letters||!input||!fb)return;currentScramble=scrambleWords[Math.floor(Math.random()*scrambleWords.length)];letters.textContent=shuffleWord(currentScramble);input.value='';fb.textContent='';}
+function bindScramble(){const check=document.getElementById('checkScrambleBtn');const next=document.getElementById('newScrambleBtn');const input=document.getElementById('scrambleInput');const fb=document.getElementById('scrambleFeedback');if(!check||!next||!input||!fb)return;renderScramble();check.addEventListener('click',()=>{const val=input.value.trim().toLowerCase();fb.textContent=val===currentScramble?'Chính xác.':`Chưa đúng. Đáp án là "${currentScramble}".`;});next.addEventListener('click',renderScramble);}
+function bindPrompts(){const promptBox=document.getElementById('promptBox');const newBtn=document.getElementById('newPromptBtn');if(promptBox){const render=()=>promptBox.textContent=prompts[Math.floor(Math.random()*prompts.length)];render();if(newBtn)newBtn.addEventListener('click',render);}const writingBox=document.getElementById('writingPromptBox');const newWriteBtn=document.getElementById('newWritingPromptBtn');if(writingBox){const renderW=()=>writingBox.textContent=writingPrompts[Math.floor(Math.random()*writingPrompts.length)];renderW();if(newWriteBtn)newWriteBtn.addEventListener('click',renderW);}}
+function bindWritingDraft(){const input=document.getElementById('writingDraftInput');const btn=document.getElementById('saveWritingDraftBtn');const out=document.getElementById('savedWritingDraft');if(!input||!btn||!out)return;const saved=getSaved(storageKeys.writingDraft,'');if(saved){input.value=saved;out.textContent='Đã tải bản nháp đã lưu trước đó.';}btn.addEventListener('click',()=>{setSaved(storageKeys.writingDraft,input.value);out.textContent='Đã lưu bản nháp vào trình duyệt của bạn.';});}
+function renderJournal(){const container=document.getElementById('journalList');if(!container)return;const list=getSaved(storageKeys.readingJournal,[]);if(!list.length){container.innerHTML='<div class="note" style="margin-top:14px">Chưa có journal nào.</div>';return;}container.innerHTML=list.map((item,index)=>`<div class="journal-item"><div><strong>${item.title}</strong><p class="small">${item.summary}</p><p class="small">${item.words}</p></div><button class="icon-btn" data-remove-journal="${index}">✕</button></div>`).join('');container.querySelectorAll('[data-remove-journal]').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.removeJournal);const current=getSaved(storageKeys.readingJournal,[]);current.splice(idx,1);setSaved(storageKeys.readingJournal,current);renderJournal();}));}
+function bindJournal(){const btn=document.getElementById('saveJournalBtn');if(!btn)return;renderJournal();btn.addEventListener('click',()=>{const title=document.getElementById('journalTitleInput').value.trim();const summary=document.getElementById('journalSummaryInput').value.trim();const words=document.getElementById('journalWordsInput').value.trim();if(!title||!summary){alert('Hãy nhập tên bài và phần tóm tắt.');return;}const current=getSaved(storageKeys.readingJournal,[]);current.unshift({title,summary,words});setSaved(storageKeys.readingJournal,current);document.getElementById('journalTitleInput').value='';document.getElementById('journalSummaryInput').value='';document.getElementById('journalWordsInput').value='';renderJournal();});}
+function bindAudioLessons(){document.querySelectorAll('.transcript-toggle').forEach(btn=>btn.addEventListener('click',()=>{const box=btn.closest('.audio-lesson').querySelector('.transcript-box');const show=box.style.display!=='none';box.style.display=show?'none':'block';btn.textContent=show?'Hiện transcript':'Ẩn transcript';}));document.querySelectorAll('.use-dictation-btn').forEach(btn=>btn.addEventListener('click',()=>{const card=btn.closest('.audio-lesson');currentDictationTranscript=card.dataset.audioTranscript||'';currentDictationTitle=`${card.dataset.audioLevel} — ${card.dataset.audioTitle}`;const title=document.getElementById('dictationTitle');const result=document.getElementById('dictationResult');if(title)title.textContent='Dictation: '+currentDictationTitle;if(result)result.textContent='Đã chọn bài. Nghe audio rồi gõ lại những gì bạn nghe được.';const textarea=document.getElementById('dictationInput');if(textarea)textarea.focus();}));}
+function bindDictation(){const check=document.getElementById('checkDictationBtn');const clear=document.getElementById('clearDictationBtn');const input=document.getElementById('dictationInput');const result=document.getElementById('dictationResult');if(!check||!clear||!input||!result)return;check.addEventListener('click',()=>{if(!currentDictationTranscript){result.textContent='Hãy chọn một bài audio trước.';return;}const user=input.value.trim();if(!user){result.textContent='Hãy nhập phần bạn nghe được.';return;}const refWords=currentDictationTranscript.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(Boolean);const userWords=user.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(Boolean);const hits=userWords.filter(w=>refWords.includes(w)).length;const score=Math.round((hits/Math.max(refWords.length,1))*100);result.innerHTML=`<p><strong>Ước lượng độ khớp:</strong> ${score}%</p><p><strong>Transcript gốc:</strong> ${currentDictationTranscript}</p>`;});clear.addEventListener('click',()=>{input.value='';result.textContent='';});}
+function renderListeningNotes(){const listBox=document.getElementById('listeningNotesList');if(!listBox)return;const list=getSaved(storageKeys.listeningNotes,[]);if(!list.length){listBox.innerHTML='<div class="note" style="margin-top:14px">Chưa có ghi chú listening nào.</div>';return;}listBox.innerHTML=list.map((item,index)=>`<div class="journal-item"><div><strong>${item.title}</strong><p class="small">${item.note}</p></div><button class="icon-btn" data-remove-listen="${index}">✕</button></div>`).join('');listBox.querySelectorAll('[data-remove-listen]').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.removeListen);const current=getSaved(storageKeys.listeningNotes,[]);current.splice(idx,1);setSaved(storageKeys.listeningNotes,current);renderListeningNotes();}));}
+function bindListeningNotes(){const btn=document.getElementById('saveListeningNoteBtn');const input=document.getElementById('listeningNoteInput');if(!btn||!input)return;renderListeningNotes();btn.addEventListener('click',()=>{const note=input.value.trim();if(!note){alert('Hãy nhập ghi chú trước.');return;}const current=getSaved(storageKeys.listeningNotes,[]);current.unshift({title: currentDictationTitle || 'Listening note', note});setSaved(storageKeys.listeningNotes,current);input.value='';renderListeningNotes();});}
+function bindCopyButtons(){document.querySelectorAll('.copy-prompt-btn').forEach(btn=>btn.addEventListener('click',async()=>{const target=document.getElementById(btn.dataset.copyTarget);if(!target)return;try{await navigator.clipboard.writeText(target.innerText);const old=btn.textContent;btn.textContent='Đã copy';setTimeout(()=>btn.textContent=old,1200);}catch(e){btn.textContent='Copy lỗi';}}));}
+function bindAiBuilder(){const btn=document.getElementById('buildAiPromptBtn');if(!btn)return;btn.addEventListener('click',()=>{const level=document.getElementById('aiLevel').value;const skill=document.getElementById('aiSkill').value;const topic=document.getElementById('aiTopic').value.trim()||'general English';const goal=document.getElementById('aiGoal').value.trim()||'steady improvement';const output=document.getElementById('aiPromptOutput');output.textContent=`Act as my ${skill.toLowerCase()} coach for English level ${level}. Create a structured practice session about "${topic}". My goal is: ${goal}. First assess what I already know with 3 quick questions. Then teach the key language I need, give me one guided practice task and one output task, and finish with specific feedback and 3 next-step actions.`;});}
+document.addEventListener('DOMContentLoaded',()=>{bindAccordions();bindTabs();bindSaveWord();renderVocabList();bindFlashcards();renderVocabQuiz();bindScramble();bindPrompts();bindWritingDraft();bindJournal();bindAudioLessons();bindDictation();bindListeningNotes();bindCopyButtons();bindAiBuilder();renderCheckboxList('grammarChecklist',grammarItems,storageKeys.grammar);renderCheckboxList('speakingChecklist',speakingItems,storageKeys.speaking);renderCheckboxList('habitChecklist',habitItems,storageKeys.habits);updateProgress();});
